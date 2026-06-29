@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "startmyigt-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-12",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "startmyigt",
+      "database_id": "PLACEHOLDER_RUN_WRANGLER_D1_CREATE"
+    }
+  ],
+  "ai": {
+    "binding": "AI"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

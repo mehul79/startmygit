@@ -1,0 +1,19 @@
+# deps
+node_modules/
+
+# env
+.env
+.env.*
+!.env.example
+
+# build output
+.next/
+dist/
+out/
+.wrangler/
+*.tsbuildinfo
+
+# misc
+.DS_Store
+.playwright-mcp/
+empty-state.png

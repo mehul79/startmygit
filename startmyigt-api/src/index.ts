@@ -38,6 +38,33 @@ app.post('/repos', async (c) => {
   return c.json(row, 201)
 })
 
+// List repos, optional ?category= filter
+app.get('/repos', async (c) => {
+  const cat = c.req.query('category')
+  const q = cat
+    ? c.env.DB.prepare("SELECT * FROM repos WHERE ',' || categories || ',' LIKE ? ORDER BY stars DESC, id DESC").bind(`%,${cat},%`)
+    : c.env.DB.prepare('SELECT * FROM repos ORDER BY stars DESC, id DESC')
+  const { results } = await q.all()
+  return c.json(results)
+})
+
+// Distinct category list for filter UI. ponytail: split CSV in JS — fine at MVP scale.
+app.get('/categories', async (c) => {
+  const { results } = await c.env.DB.prepare('SELECT categories FROM repos').all<{ categories: string }>()
+  const set = new Set<string>()
+  for (const r of results) for (const cat of r.categories.split(',')) if (cat) set.add(cat)
+  return c.json([...set].sort())
+})
+
+// In-app star count (not a GitHub star). No dedup yet.
+// ponytail: anyone can bump infinitely. Add hashed-IP/cookie dedup when stars become a real signal.
+app.post('/repos/:id/star', async (c) => {
+  const row = await c.env.DB.prepare('UPDATE repos SET stars = stars + 1 WHERE id = ? RETURNING id, stars')
+    .bind(c.req.param('id')).first()
+  if (!row) return c.json({ error: 'not found' }, 404)
+  return c.json(row)
+})
+
 export default app
 
 // --- helpers ---

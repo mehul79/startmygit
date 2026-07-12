@@ -1,8 +1,10 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import { api, type Repo } from "@/lib/api";
-import { PillButton } from "@/components/resin";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ArrowRightIcon, GitHubIcon, LockIcon } from "@/components/icons";
 
 type Status = "idle" | "loading" | "error";
 
@@ -10,8 +12,6 @@ export function SubmitForm({ onAdded }: { onAdded: (repo: Repo) => void }) {
   const [url, setUrl] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
-  const inputId = useId();
-  const errorId = useId();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,46 +30,45 @@ export function SubmitForm({ onAdded }: { onAdded: (repo: Repo) => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:max-w-md">
-      <label htmlFor={inputId} className="text-sm font-medium text-ink">
-        Add a repo
-      </label>
-      <div className="flex gap-2">
-        <input
-          id={inputId}
+    <form onSubmit={handleSubmit} className="flex max-w-xl flex-col gap-3">
+      <div className="flex items-center gap-2 rounded-xl border border-rule bg-card p-1.5 pl-4 shadow-sm">
+        <GitHubIcon size={18} className="shrink-0 text-ink" />
+        <Input
+          id="repo-url"
           type="url"
           required
-          placeholder="github.com/owner/repo"
+          placeholder="Paste a public GitHub repository URL"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={status === "loading"}
-          aria-describedby={error ? errorId : undefined}
           aria-invalid={status === "error"}
-          className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus-visible:border-accent disabled:opacity-60"
+          className="h-11 border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
         />
-        <PillButton type="submit" disabled={status === "loading"} className="shrink-0">
+        <Button type="submit" disabled={status === "loading"} className="h-11 shrink-0 rounded-lg px-5">
           {status === "loading" ? (
             <>
               <span
                 aria-hidden
-                className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white"
+                className="size-3 animate-spin rounded-full border-2 border-white/30 border-t-white"
               />
               Reading&hellip;
             </>
           ) : (
-            "Submit"
+            <>
+              Analyze repository <ArrowRightIcon size={15} />
+            </>
           )}
-        </PillButton>
+        </Button>
       </div>
-      <p className="text-xs text-ink-muted">
-        Paste a public GitHub repo URL &mdash; the summary, tech stack, and categories are generated
-        automatically.
-      </p>
       {error && (
-        <p id={errorId} role="alert" className="text-sm text-danger">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
+      <p className="flex items-center gap-2 text-sm text-ink-muted">
+        <LockIcon size={13} className="text-ink-muted" />
+        No accounts. No logins. Just public repositories.
+      </p>
     </form>
   );
 }

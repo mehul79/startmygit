@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { ArrowRightIcon } from "@/components/icons";
+
 export function CategoryFilter({
   categories,
   active,
@@ -9,30 +12,42 @@ export function CategoryFilter({
   active: string | null;
   onSelect: (category: string | null) => void;
 }) {
-  if (categories.length === 0) return null;
+  const [showAll, setShowAll] = useState(false);
 
   return (
-    <nav
-      aria-label="Filter by category"
-      className="sticky top-0 z-10 -mx-4 flex gap-2 overflow-x-auto bg-bg/95 px-4 py-3 backdrop-blur-sm"
-    >
-      <Chip label="All" isActive={active === null} onClick={() => onSelect(null)} />
-      {categories.map((c) => (
-        <Chip key={c} label={c} isActive={active === c} onClick={() => onSelect(c)} />
-      ))}
-    </nav>
+    <div className="grid border-b border-rule lg:grid-cols-[1fr_240px]">
+      <nav
+        aria-label="Filter by category"
+        className={`flex gap-7 px-6 sm:px-10 ${
+          showAll
+            ? "flex-wrap"
+            : "overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        }`}
+      >
+        <Tab label="All" isActive={active === null} onClick={() => onSelect(null)} />
+        {categories.map((c) => (
+          <Tab key={c} label={c} isActive={active === c} onClick={() => onSelect(c)} />
+        ))}
+      </nav>
+      <button
+        onClick={() => setShowAll((s) => !s)}
+        className="hidden items-center justify-center gap-2 border-l border-rule px-6 py-4 text-sm text-ink transition-colors hover:text-orange lg:flex"
+      >
+        {showAll ? "Collapse categories" : "View all categories"} <ArrowRightIcon size={14} />
+      </button>
+    </div>
   );
 }
 
-function Chip({ label, isActive, onClick }: { label: string; isActive: boolean; onClick: () => void }) {
+function Tab({ label, isActive, onClick }: { label: string; isActive: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       aria-pressed={isActive}
-      className={`shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors active:scale-[0.97] ${
+      className={`-mb-px shrink-0 border-b-2 py-4 text-sm transition-colors ${
         isActive
-          ? "border-accent bg-accent text-accent-ink"
-          : "border-border bg-surface text-ink-muted hover:border-accent hover:text-accent"
+          ? "border-orange font-medium text-ink"
+          : "border-transparent text-ink-muted hover:text-ink"
       }`}
     >
       {label}

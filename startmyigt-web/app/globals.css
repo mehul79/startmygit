@@ -1,42 +1,94 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-/* Committed dark UI (not a light/dark toggle) — amber-tinted near-black.
-   Contrast ratios verified: body 15.8:1, muted 6.7:1, button text 9.5:1,
-   category chip text 9.7:1, error text 7.8:1. All exceed WCAG AA. */
+@custom-variant dark (&:is(.dark *));
+
+/* Warm-paper editorial light theme, orange accent — matches the reference comp. */
 :root {
-  --bg: oklch(16% 0.012 75);
-  --surface: oklch(21% 0.014 75);
-  --surface-2: oklch(26% 0.016 75);
-  --border: oklch(34% 0.016 75);
-  --ink: oklch(93% 0.01 75);
-  --ink-muted: oklch(68% 0.02 75);
-  --accent: oklch(78% 0.15 70);
-  --accent-ink: oklch(16% 0.02 70);
-  --danger: oklch(75% 0.17 20);
-  --category-bg: oklch(26% 0.03 70);
-  --category-text: oklch(85% 0.1 70);
+  --bg: oklch(97.8% 0.005 85);
+  --ink: oklch(22% 0.01 75);
+  --ink-muted: oklch(48% 0.015 75);
+  --rule: oklch(90% 0.008 85); /* hairline dividers */
+  --orange: oklch(62% 0.19 42); /* ~#e8590c */
+  --danger: oklch(55% 0.2 25);
+
+  /* shadcn tokens mapped onto the same palette */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: oklch(99.5% 0.003 85);
+  --card-foreground: var(--ink);
+  --popover: oklch(99.5% 0.003 85);
+  --popover-foreground: var(--ink);
+  --primary: oklch(20% 0.012 75); /* near-black CTA */
+  --primary-foreground: oklch(98% 0.004 85);
+  --secondary: oklch(94% 0.008 85);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(94% 0.008 85);
+  --muted-foreground: var(--ink-muted);
+  --accent: oklch(94% 0.008 85);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--orange);
+  --radius: 0.625rem;
 }
 
 @theme inline {
   --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-border: var(--border);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
-  --color-accent: var(--accent);
-  --color-accent-ink: var(--accent-ink);
+  --color-rule: var(--rule);
+  --color-orange: var(--orange);
   --color-danger: var(--danger);
-  --color-category-bg: var(--category-bg);
-  --color-category-text: var(--category-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-display-serif);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-weight: 350; /* light text on dark reads heavier at 400 */
+}
+
+/* Hero background: soft gradient blobs (the far-fade radial IS the blur) + film grain. */
+.hero-atmosphere {
+  position: relative;
+  background:
+    radial-gradient(60% 85% at 100% 100%, oklch(70% 0.16 45 / 0.5), transparent 72%),
+    radial-gradient(38% 55% at 12% 2%, oklch(42% 0.02 260 / 0.3), transparent 68%),
+    radial-gradient(30% 42% at 48% -8%, oklch(55% 0.015 260 / 0.2), transparent 70%);
+}
+.hero-atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");
 }
 
 /* Keyboard-only focus ring, never on mouse/touch */
@@ -44,7 +96,7 @@ body {
   outline: none;
 }
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--orange);
   outline-offset: 2px;
 }
 
@@ -69,5 +121,17 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }

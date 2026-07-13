@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { env } from 'hono/adapter';
 import { cors } from 'hono/cors'
 
 type Bindings = { DB: D1Database; AI: Ai }
@@ -28,23 +29,37 @@ app.post('/repos', async (c) => {
   const readme = await fetchReadme(owner, name)
   if (readme === null) return c.json({ error: 'repo not found or no readme' }, 404)
 
-  const ai = await summarize(c.env.AI, owner, name, readme)
+  const [ai, stars] = await Promise.all([summarize(c.env.AI, owner, name, readme), fetchStars(owner, name)])
 
   const row = await c.env.DB.prepare(
-    `INSERT INTO repos (url, owner, name, summary, tech_stack, categories)
-     VALUES (?, ?, ?, ?, ?, ?) RETURNING *`
-  ).bind(canonical, owner, name, ai.summary, ai.tech_stack.join(','), ai.categories.join(',')).first()
+    `INSERT INTO repos (url, owner, name, summary, tech_stack, categories, stars)
+     VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *`
+  ).bind(canonical, owner, name, ai.summary, ai.tech_stack.join(','), ai.categories.join(','), stars).first()
 
   return c.json(row, 201)
 })
 
-// List repos, optional ?category= filter
+// List repos, optional ?category= filter. Star counts are refreshed live from GitHub on every load.
 app.get('/repos', async (c) => {
   const cat = c.req.query('category')
   const q = cat
     ? c.env.DB.prepare("SELECT * FROM repos WHERE ',' || categories || ',' LIKE ? ORDER BY stars DESC, id DESC").bind(`%,${cat},%`)
     : c.env.DB.prepare('SELECT * FROM repos ORDER BY stars DESC, id DESC')
-  const { results } = await q.all()
+  const { results } = await q.all<{ id: number; owner: string; name: string; stars: number }>()
+
+  // ponytail: one GitHub call per listed repo, every list load. Fine at MVP scale (unauth 60 req/hr);
+  // add caching/ETags or a cron refresh if the repo count grows or this starts 429ing.
+  await Promise.all(
+    results.map(async (r) => {
+      const live = await fetchStars(r.owner, r.name)
+      if (live !== null && live !== r.stars) {
+        r.stars = live
+        await c.env.DB.prepare('UPDATE repos SET stars = ? WHERE id = ?').bind(live, r.id).run()
+      }
+    })
+  )
+
+  results.sort((a, b) => b.stars - a.stars || b.id - a.id)
   return c.json(results)
 })
 
@@ -54,15 +69,6 @@ app.get('/categories', async (c) => {
   const set = new Set<string>()
   for (const r of results) for (const cat of r.categories.split(',')) if (cat) set.add(cat)
   return c.json([...set].sort())
-})
-
-// In-app star count (not a GitHub star). No dedup yet.
-// ponytail: anyone can bump infinitely. Add hashed-IP/cookie dedup when stars become a real signal.
-app.post('/repos/:id/star', async (c) => {
-  const row = await c.env.DB.prepare('UPDATE repos SET stars = stars + 1 WHERE id = ? RETURNING id, stars')
-    .bind(c.req.param('id')).first()
-  if (!row) return c.json({ error: 'not found' }, 404)
-  return c.json(row)
 })
 
 export default app
@@ -87,14 +93,23 @@ async function fetchReadme(owner: string, name: string): Promise<string | null> 
   return text.slice(0, 8000) // cap tokens fed to the model
 }
 
+async function fetchStars(owner: string, name: string): Promise<number | null> {
+  const res = await fetch(`https://api.github.com/repos/${owner}/${name}`, {
+    headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'startmyigt' },
+  })
+  if (!res.ok) return null
+  const data = await res.json<{ stargazers_count?: number }>()
+  return data.stargazers_count ?? null
+}
+
 async function summarize(ai: Ai, owner: string, name: string, readme: string) {
   const prompt = `You are cataloging a GitHub repo "${owner}/${name}". Based on its README below, respond with ONLY a JSON object, no prose, shaped exactly:
-{"summary": "2-3 plain sentences a non-expert understands", "tech_stack": ["Language","Framework",...], "categories": ["1-3 short lowercase-kebab tags like web, cli, ai-tools, game"]}
+{"summary": "2-3 plain sentences a non-expert understands", "tech_stack": ["Language","Framework",...], "categories": ["1 to 4 short lowercase-kebab tags describing what it IS and what it's FOR, e.g. web, cli, game, ai-tools, rag, llm, chatbot, embeddings, devtools, data-pipeline — always return at least one, never an empty list"]}
 
 README:
 ${readme}`
 
-  const res = await ai.run('@cf/meta/llama-3.1-8b-instruct', {
+  const res = await ai.run('@cf/meta/llama-3.1-8b-instruct-fp8', {
     messages: [{ role: 'user', content: prompt }],
   }) as { response?: string }
 
@@ -108,15 +123,15 @@ function parseAi(text: string): { summary: string; tech_stack: string[]; categor
     const o = JSON.parse(match ? match[0] : text)
     return {
       summary: String(o.summary ?? '').trim() || 'No summary generated.',
-      tech_stack: toStrArray(o.tech_stack),
-      categories: toStrArray(o.categories),
+      tech_stack: toStrArray(o.tech_stack, 8),
+      categories: toStrArray(o.categories, 4),
     }
   } catch {
     return { summary: 'No summary generated.', tech_stack: [], categories: [] }
   }
 }
 
-function toStrArray(v: unknown): string[] {
+function toStrArray(v: unknown, max: number): string[] {
   if (!Array.isArray(v)) return []
-  return v.map((x) => String(x).trim()).filter(Boolean).slice(0, 8)
+  return v.map((x) => String(x).trim()).filter(Boolean).slice(0, max)
 }

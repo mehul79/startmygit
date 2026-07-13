@@ -17,9 +17,9 @@ added. Visitors can star repos they like.
 
 - No user accounts / auth / sessions for MVP. Submitting a repo needs no login.
 - No separate `categories` table — AI returns 1–3 category strings per repo, stored as a text column, `SELECT DISTINCT` for the filter list. Normalize only when this actually breaks.
-- Star button = plain `<a href="https://github.com/owner/repo">` linking to GitHub's own star button. Not a one-click OAuth star. Real GitHub stars require the user's own OAuth token — GitHub won't let us star on someone's behalf without it, so redirect is the lazy-correct default.
-  - If an in-app "like" count independent of GitHub is ever wanted, that's anonymous per-browser dedup (localStorage + hashed-IP/cookie on the Worker) — still no login.
-  - "Sign in with GitHub" is the cheap upgrade path *if* one-click starring or spam-gating is ever needed later — one OAuth route on the Worker, no password storage.
+- Star button = plain `<a href="https://github.com/owner/repo">` linking out to GitHub. Not a one-click OAuth star. Real GitHub stars require the user's own OAuth token — GitHub won't let us star on someone's behalf without it, so redirect is the lazy-correct default.
+  - Displayed star count mirrors GitHub's real `stargazers_count`, refreshed via the GitHub API on every `GET /repos` load (see schema.sql) — not an in-app increment.
+  - "Sign in with GitHub" is the cheap upgrade path *if* one-click starring is ever needed later — one OAuth route on the Worker, no password storage.
 - No Node/Express, no Python/FastAPI backend — wrong runtime for Workers.
 
 ## Local dev
@@ -53,10 +53,9 @@ the real cloud AI, so `wrangler dev` requires an authenticated session.
 
 ### API routes (startmyigt-api/src/index.ts)
 
-- `POST /repos {url}` — parse → fetch readme → Workers AI (llama-3.1-8b) → store. 400 bad url / 409 dup / 404 no readme.
-- `GET /repos?category=` — list, optional category filter, sorted by stars.
+- `POST /repos {url}` — parse → fetch readme → Workers AI (llama-3.1-8b) + live GitHub star count → store. 400 bad url / 409 dup / 404 no readme.
+- `GET /repos?category=` — list, optional category filter, sorted by stars; refreshes each repo's star count from GitHub on the way out.
 - `GET /categories` — distinct category tags for the filter UI.
-- `POST /repos/:id/star` — bump in-app star count.
 
 ## Deploy
 

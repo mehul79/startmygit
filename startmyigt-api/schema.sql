@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS repos (
   summary     TEXT NOT NULL,
   tech_stack  TEXT NOT NULL DEFAULT '',    -- CSV: "TypeScript,React,D1"
   categories  TEXT NOT NULL DEFAULT '',    -- CSV: "web,ai-tools"
-  stars       INTEGER NOT NULL DEFAULT 0,  -- in-app count, not GitHub's
+  stars       INTEGER NOT NULL DEFAULT 0,  -- mirrors GitHub's stargazers_count, refreshed on every GET /repos
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );

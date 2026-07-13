@@ -35,6 +35,34 @@
   --radius: 0.625rem;
 }
 
+.dark {
+  --bg: oklch(19% 0.012 75);
+  --ink: oklch(92% 0.006 85);
+  --ink-muted: oklch(68% 0.014 75);
+  --rule: oklch(30% 0.014 75);
+  --orange: oklch(70% 0.18 42);
+  --danger: oklch(65% 0.2 25);
+
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: oklch(23% 0.012 75);
+  --card-foreground: var(--ink);
+  --popover: oklch(23% 0.012 75);
+  --popover-foreground: var(--ink);
+  --primary: oklch(92% 0.006 85);
+  --primary-foreground: oklch(19% 0.012 75);
+  --secondary: oklch(27% 0.014 75);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(27% 0.014 75);
+  --muted-foreground: var(--ink-muted);
+  --accent: oklch(27% 0.014 75);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--orange);
+}
+
 @theme inline {
   --color-bg: var(--bg);
   --color-ink: var(--ink);
@@ -98,6 +126,9 @@ body {
 :focus-visible {
   outline: 2px solid var(--orange);
   outline-offset: 2px;
+}
+#repo-url:focus-visible {
+  outline: none;
 }
 
 @keyframes card-in {

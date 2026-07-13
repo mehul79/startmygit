@@ -1,6 +1,6 @@
 import { csv, type Repo } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpRightIcon, RepoIcon, StarIcon } from "@/components/icons";
+import { RepoIcon, StarIcon } from "@/components/icons";
 
 function formatDate(sqlite: string) {
   const d = new Date(sqlite.replace(" ", "T") + "Z");
@@ -66,14 +66,6 @@ export function RepoCard({ repo, isNew }: { repo: Repo; isNew?: boolean }) {
         >
           <StarIcon size={18} className="text-ink-muted transition-colors group-hover:text-orange" />
           <span className="tabular-nums">{repo.stars.toLocaleString()}</span>
-        </a>
-        <a
-          href={`https://${repo.url}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1 text-sm text-ink-muted hover:text-orange"
-        >
-          View on GitHub <ArrowUpRightIcon size={13} />
         </a>
       </div>
     </article>

@@ -44,6 +44,19 @@ export const ChevronDownIcon = ({ size, className }: P) => (
   </svg>
 );
 
+export const SunIcon = ({ size, className }: P) => (
+  <svg {...base(size)} className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <circle cx="8" cy="8" r="3" />
+    <path d="M8 .5v2M8 13.5v2M15.5 8h-2M2.5 8h-2M13.06 2.94l-1.42 1.42M4.36 11.64l-1.42 1.42M13.06 13.06l-1.42-1.42M4.36 4.36 2.94 2.94" strokeLinecap="round" />
+  </svg>
+);
+
+export const MoonIcon = ({ size, className }: P) => (
+  <svg {...base(size)} className={className} viewBox="0 0 16 16" fill="currentColor">
+    <path d="M6.5 1a6.5 6.5 0 1 0 7.4 9.9A6 6 0 0 1 6.5 1Z" />
+  </svg>
+);
+
 export const CodeMarkIcon = ({ size, className }: P) => (
   <svg {...base(size)} className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
     <path d="m5 4-4 4 4 4M11 4l4 4-4 4M9.5 2.5l-3 11" strokeLinecap="round" strokeLinejoin="round" />

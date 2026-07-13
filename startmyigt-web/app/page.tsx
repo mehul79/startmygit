@@ -5,7 +5,8 @@ import { api, type Repo } from "@/lib/api";
 import { SubmitForm } from "@/components/SubmitForm";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { RepoGrid } from "@/components/RepoGrid";
-import { CodeMarkIcon, GitHubIcon } from "@/components/icons";
+import { CodeMarkIcon } from "@/components/icons";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   const [repos, setRepos] = useState<Repo[]>([]);
@@ -59,18 +60,17 @@ export default function Home() {
               Explore
               <span aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 bg-orange" />
             </a>
-            <span aria-hidden className="size-0.5 rounded-full bg-ink-muted" />
-            <a href="#about" className="py-5 text-ink-muted hover:text-ink">
-              About
-            </a>
           </nav>
         </div>
-        <button
-          onClick={focusSubmit}
-          className="flex items-center gap-2 border-l border-rule px-6 text-sm font-medium text-ink transition-colors hover:text-orange"
-        >
-          <span aria-hidden className="text-base leading-none">+</span> Submit a repo
-        </button>
+        <div className="flex items-stretch">
+          <ThemeToggle />
+          <button
+            onClick={focusSubmit}
+            className="flex items-center gap-2 border-l border-rule px-6 text-sm font-medium text-ink transition-colors hover:text-orange"
+          >
+            <span aria-hidden className="text-base leading-none">+</span> Submit a repo
+          </button>
+        </div>
       </header>
 
       <section className="hero-atmosphere border-b border-rule">
@@ -113,17 +113,13 @@ export default function Home() {
         />
       </main>
 
-      <footer id="about" className="flex flex-col justify-between gap-4 px-6 py-8 sm:flex-row sm:items-center sm:px-10">
+      <footer className="flex flex-col justify-between gap-4 px-6 py-8 sm:flex-row sm:items-center sm:px-10">
         <div>
           <p className="text-sm font-bold text-ink">startmyigt</p>
           <p className="mt-1 text-sm text-ink-muted">
             Exploring the world&rsquo;s open source, one README at a time.
           </p>
         </div>
-        <p className="flex items-center gap-3 text-sm text-ink-muted">
-          Built with <span aria-hidden>♥</span> and open source
-          <GitHubIcon size={20} className="text-ink" />
-        </p>
       </footer>
     </div>
   );

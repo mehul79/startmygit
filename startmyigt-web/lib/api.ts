@@ -34,9 +34,6 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
     }).then((r) => json<Repo>(r)),
-
-  starRepo: (id: number): Promise<{ id: number; stars: number }> =>
-    fetch(`${API_URL}/repos/${id}/star`, { method: "POST" }).then((r) => json(r)),
 };
 
 export const csv = (s: string): string[] => s.split(",").filter(Boolean);

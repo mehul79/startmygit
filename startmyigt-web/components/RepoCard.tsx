@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import { csv, type Repo } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpRightIcon, RepoIcon, StarIcon } from "@/components/icons";
@@ -12,31 +9,7 @@ function formatDate(sqlite: string) {
     : d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
 }
 
-export function RepoCard({
-  repo,
-  onStar,
-  isNew,
-}: {
-  repo: Repo;
-  onStar: (id: number) => Promise<void>;
-  isNew?: boolean;
-}) {
-  const [stars, setStars] = useState(repo.stars);
-  const [starring, setStarring] = useState(false);
-
-  async function handleStar() {
-    if (starring) return;
-    setStarring(true);
-    setStars((s) => s + 1); // optimistic
-    try {
-      await onStar(repo.id);
-    } catch {
-      setStars((s) => s - 1); // rollback
-    } finally {
-      setStarring(false);
-    }
-  }
-
+export function RepoCard({ repo, isNew }: { repo: Repo; isNew?: boolean }) {
   return (
     <article
       className={`grid gap-5 border-b border-rule px-6 py-8 sm:px-10 md:grid-cols-[220px_1fr_170px] md:gap-8 ${
@@ -84,15 +57,16 @@ export function RepoCard({
       </div>
 
       <div className="flex flex-row items-center gap-4 md:flex-col md:items-end md:gap-3">
-        <button
-          onClick={handleStar}
-          disabled={starring}
-          aria-label={`Star ${repo.owner}/${repo.name} (${stars} stars)`}
-          className="group flex items-center gap-2 text-lg font-semibold text-ink transition-transform active:scale-[0.96]"
+        <a
+          href={`https://${repo.url}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${repo.owner}/${repo.name} on GitHub (${repo.stars} stars)`}
+          className="group flex items-center gap-2 text-lg font-semibold text-ink"
         >
           <StarIcon size={18} className="text-ink-muted transition-colors group-hover:text-orange" />
-          <span className="tabular-nums">{stars.toLocaleString()}</span>
-        </button>
+          <span className="tabular-nums">{repo.stars.toLocaleString()}</span>
+        </a>
         <a
           href={`https://${repo.url}`}
           target="_blank"

@@ -44,10 +44,6 @@ export default function Home() {
     });
   }
 
-  async function handleStar(id: number) {
-    await api.starRepo(id);
-  }
-
   const focusSubmit = () => document.getElementById("repo-url")?.focus();
 
   return (
@@ -113,7 +109,6 @@ export default function Home() {
           loading={loading}
           activeCategory={activeCategory}
           onClearFilter={() => setActiveCategory(null)}
-          onStar={handleStar}
           newestId={newestId}
         />
       </main>

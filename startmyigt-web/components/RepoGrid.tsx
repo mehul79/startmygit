@@ -13,14 +13,12 @@ export function RepoGrid({
   loading,
   activeCategory,
   onClearFilter,
-  onStar,
   newestId,
 }: {
   repos: Repo[];
   loading: boolean;
   activeCategory: string | null;
   onClearFilter: () => void;
-  onStar: (id: number) => Promise<void>;
   newestId: number | null;
 }) {
   const [visible, setVisible] = useState(PAGE);
@@ -53,7 +51,7 @@ export function RepoGrid({
   return (
     <div>
       {repos.slice(0, visible).map((repo) => (
-        <RepoCard key={repo.id} repo={repo} onStar={onStar} isNew={repo.id === newestId} />
+        <RepoCard key={repo.id} repo={repo} isNew={repo.id === newestId} />
       ))}
       {repos.length > visible && (
         <div className="flex justify-center border-b border-rule px-6 py-10">

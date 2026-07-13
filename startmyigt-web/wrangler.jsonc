@@ -1,8 +1,5 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	// name MUST match the Worker created in the dashboard ("startmygit"),
-	// and WORKER_SELF_REFERENCE.service MUST equal this same name —
-	// that mismatch was the 10143 deploy error.
 	"name": "startmygit-web",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2026-07-12",
